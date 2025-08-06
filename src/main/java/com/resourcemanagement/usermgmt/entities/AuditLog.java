@@ -19,6 +19,7 @@ public class AuditLog {
     private Long id;
 
     private String action;
+    private String entity;
     private String performedBy;
     private LocalDateTime performedAt;
     private String details;

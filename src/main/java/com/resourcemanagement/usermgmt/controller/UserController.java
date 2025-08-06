@@ -24,23 +24,6 @@ public class UserController {
         this.userService = userService;
     }
 
-    @PostMapping("/register")
-    public ResponseEntity<User> registerUser(@RequestBody User user) {
-        User registeredUser = userService.registerUser(user);
-        return ResponseEntity.status(HttpStatus.CREATED).body(registeredUser);
-    }
-
-    @PostMapping("/validate")
-    public ResponseEntity<UserDTO> validateUserForLogin(@RequestBody LoginRequestDTO loginRequest) {
-        try {
-            User user = userService.validateUser(loginRequest.getUsername(), loginRequest.getPassword());
-            UserDTO userDTO = toDto(user);
-            return ResponseEntity.ok(userDTO);
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
-        }
-    }
-
     @GetMapping
     public ResponseEntity<List<UserDTO>> getAllUsers() {
 
@@ -53,6 +36,48 @@ public class UserController {
         }
 
         return ResponseEntity.status(HttpStatus.OK).body(dtos);
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<UserDTO> getUserById(@PathVariable Long id) {
+        User user = userService.findById(id);
+        UserDTO userDTO = toDto(user);
+        return ResponseEntity.status(HttpStatus.OK).body(userDTO);
+    }
+
+    @PostMapping
+    public ResponseEntity<UserDTO> createUser(@RequestBody User user, @RequestHeader("X-User-Email") String performedBy) {
+        User registeredUser = userService.registerUser(user, performedBy);
+        UserDTO userDTO = toDto(registeredUser);
+        return ResponseEntity.status(HttpStatus.CREATED).body(userDTO);
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<UserDTO> updateUser(@PathVariable Long id, @RequestBody User updatedUser, @RequestHeader("X-User-Email") String performedBy) {
+        User user = userService.updateUser(id, updatedUser, performedBy);
+        UserDTO userDTO = toDto(user);
+        return ResponseEntity.status(HttpStatus.CREATED).body(userDTO);
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<?> deleteUser(@PathVariable Long id, @RequestHeader("X-User-Email") String performedBy) {
+        boolean deleted = userService.deleteUser(id, performedBy);
+        if (deleted) {
+            return ResponseEntity.ok().build();
+        } else {
+            return ResponseEntity.notFound().build();
+        }
+    }
+
+    @PostMapping("/validate")
+    public ResponseEntity<UserDTO> validateUserForLogin(@RequestBody LoginRequestDTO loginRequest) {
+        try {
+            User user = userService.validateUser(loginRequest.getUsername(), loginRequest.getPassword());
+            UserDTO userDTO = toDto(user);
+            return ResponseEntity.ok(userDTO);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
     }
 
     public UserDTO toDto(User user) {
