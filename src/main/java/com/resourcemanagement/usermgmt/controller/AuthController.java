@@ -2,6 +2,7 @@ package com.resourcemanagement.usermgmt.controller;
 
 import com.resourcemanagement.usermgmt.dtos.AuthResponseDTO;
 import com.resourcemanagement.usermgmt.dtos.LoginRequestDTO;
+import com.resourcemanagement.usermgmt.dtos.UserDTO;
 import com.resourcemanagement.usermgmt.entities.Role;
 import com.resourcemanagement.usermgmt.entities.User;
 import com.resourcemanagement.usermgmt.services.BlacklistedTokenService;
@@ -38,7 +39,8 @@ public class AuthController {
                     .map(Role::getName)
                     .collect(Collectors.toSet());
 
-            AuthResponseDTO authResponseDTO = new AuthResponseDTO(user.getId(), user.getEmail(), user.getUsername(), roles.toString(), token);
+            UserDTO userDTO = new UserDTO(user.getId(), user.getEmail(), user.getUsername(), roles);
+            AuthResponseDTO authResponseDTO = new AuthResponseDTO(token, userDTO);
             return ResponseEntity.status(HttpStatus.OK).body(authResponseDTO);
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();

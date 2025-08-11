@@ -1,6 +1,5 @@
 package com.resourcemanagement.usermgmt.dtos;
 
-import com.resourcemanagement.usermgmt.entities.Role;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
