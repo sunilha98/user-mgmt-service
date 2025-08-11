@@ -1,7 +1,7 @@
 package com.resourcemanagement.usermgmt.controller;
 
-import com.resourcemanagement.usermgmt.dtos.LoginRequestDTO;
 import com.resourcemanagement.usermgmt.dtos.UserDTO;
+import com.resourcemanagement.usermgmt.dtos.UserRegistrationDTO;
 import com.resourcemanagement.usermgmt.entities.Role;
 import com.resourcemanagement.usermgmt.entities.User;
 import com.resourcemanagement.usermgmt.services.UserService;
@@ -25,8 +25,8 @@ public class UserController {
     }
 
     @GetMapping
-    public ResponseEntity<List<UserDTO>> getAllUsers() {
-
+    public ResponseEntity<List<UserDTO>> getAllUsers(@RequestHeader("X-Auth-Username") String userName, @RequestHeader("X-Auth-Role") String roles,
+                                                     @RequestHeader("X-Auth-Email") String email) {
         List<User> users = userService.getAllUsers();
         List<UserDTO> dtos = new ArrayList<>();
 
@@ -46,37 +46,26 @@ public class UserController {
     }
 
     @PostMapping
-    public ResponseEntity<UserDTO> createUser(@RequestBody User user, @RequestHeader("X-User-Email") String performedBy) {
+    public ResponseEntity<UserDTO> createUser(@RequestBody UserRegistrationDTO user, @RequestHeader("X-Auth-Username") String performedBy) {
         User registeredUser = userService.registerUser(user, performedBy);
         UserDTO userDTO = toDto(registeredUser);
         return ResponseEntity.status(HttpStatus.CREATED).body(userDTO);
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<UserDTO> updateUser(@PathVariable Long id, @RequestBody User updatedUser, @RequestHeader("X-User-Email") String performedBy) {
+    public ResponseEntity<UserDTO> updateUser(@PathVariable Long id, @RequestBody UserRegistrationDTO updatedUser, @RequestHeader("X-Auth-Username") String performedBy) {
         User user = userService.updateUser(id, updatedUser, performedBy);
         UserDTO userDTO = toDto(user);
         return ResponseEntity.status(HttpStatus.CREATED).body(userDTO);
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<?> deleteUser(@PathVariable Long id, @RequestHeader("X-User-Email") String performedBy) {
+    public ResponseEntity<?> deleteUser(@PathVariable Long id, @RequestHeader("X-Auth-Username") String performedBy) {
         boolean deleted = userService.deleteUser(id, performedBy);
         if (deleted) {
             return ResponseEntity.ok().build();
         } else {
             return ResponseEntity.notFound().build();
-        }
-    }
-
-    @PostMapping("/validate")
-    public ResponseEntity<UserDTO> validateUserForLogin(@RequestBody LoginRequestDTO loginRequest) {
-        try {
-            User user = userService.validateUser(loginRequest.getUsername(), loginRequest.getPassword());
-            UserDTO userDTO = toDto(user);
-            return ResponseEntity.ok(userDTO);
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
     }
 

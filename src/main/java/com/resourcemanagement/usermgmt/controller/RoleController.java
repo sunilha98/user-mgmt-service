@@ -31,19 +31,19 @@ public class RoleController {
     }
 
     @PostMapping
-    public ResponseEntity<Role> createRole(@RequestBody Role role, @RequestHeader("X-User-Email") String performedBy) {
+    public ResponseEntity<Role> createRole(@RequestBody Role role, @RequestHeader("X-Auth-Username") String performedBy) {
         Role saved = roleService.createNewRole(role, performedBy);
         return ResponseEntity.status(HttpStatus.CREATED).body(saved);
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Role> updateRole(@PathVariable Long id, @RequestBody Role updatedRole, @RequestHeader("X-User-Email") String performedBy) {
+    public ResponseEntity<Role> updateRole(@PathVariable Long id, @RequestBody Role updatedRole, @RequestHeader("X-Auth-Username") String performedBy) {
         Role role = roleService.updateRole(id, updatedRole, performedBy);
         return ResponseEntity.status(HttpStatus.OK).body(role);
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<?> deleteRole(@PathVariable Long id, @RequestHeader("X-User-Email") String performedBy) {
+    public ResponseEntity<?> deleteRole(@PathVariable Long id, @RequestHeader("X-Auth-Username") String performedBy) {
         boolean delete = roleService.deleteRole(id, performedBy);
         if (delete) {
             return ResponseEntity.ok().build();
