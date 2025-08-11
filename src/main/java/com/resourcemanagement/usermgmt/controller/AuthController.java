@@ -46,7 +46,7 @@ public class AuthController {
     }
 
     @PostMapping("/logout")
-    public ResponseEntity<Void> logout(@RequestHeader ("X-Bearer-Token") String bearerToken) {
+    public ResponseEntity<Void> logout(@RequestHeader("X-Bearer-Token") String bearerToken) {
 
         if (bearerToken != null && !bearerToken.isEmpty()) {
             blacklistedTokenService.blacklistToken(bearerToken);
