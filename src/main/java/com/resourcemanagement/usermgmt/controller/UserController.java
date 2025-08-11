@@ -27,35 +27,26 @@ public class UserController {
     @GetMapping
     public ResponseEntity<List<UserDTO>> getAllUsers(@RequestHeader("X-Auth-Username") String userName, @RequestHeader("X-Auth-Role") String roles,
                                                      @RequestHeader("X-Auth-Email") String email) {
-        List<User> users = userService.getAllUsers();
-        List<UserDTO> dtos = new ArrayList<>();
-
-        for (User user : users) {
-            UserDTO dto = toDto(user);
-            dtos.add(dto);
-        }
+        List<UserDTO> dtos = userService.getAllUsers();
 
         return ResponseEntity.status(HttpStatus.OK).body(dtos);
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<UserDTO> getUserById(@PathVariable Long id) {
-        User user = userService.findById(id);
-        UserDTO userDTO = toDto(user);
+        UserDTO userDTO = userService.findById(id);
         return ResponseEntity.status(HttpStatus.OK).body(userDTO);
     }
 
     @PostMapping
     public ResponseEntity<UserDTO> createUser(@RequestBody UserRegistrationDTO user, @RequestHeader("X-Auth-Username") String performedBy) {
-        User registeredUser = userService.registerUser(user, performedBy);
-        UserDTO userDTO = toDto(registeredUser);
+        UserDTO userDTO = userService.registerUser(user, performedBy);
         return ResponseEntity.status(HttpStatus.CREATED).body(userDTO);
     }
 
     @PutMapping("/{id}")
     public ResponseEntity<UserDTO> updateUser(@PathVariable Long id, @RequestBody UserRegistrationDTO updatedUser, @RequestHeader("X-Auth-Username") String performedBy) {
-        User user = userService.updateUser(id, updatedUser, performedBy);
-        UserDTO userDTO = toDto(user);
+        UserDTO userDTO = userService.updateUser(id, updatedUser, performedBy);
         return ResponseEntity.status(HttpStatus.CREATED).body(userDTO);
     }
 
@@ -67,14 +58,5 @@ public class UserController {
         } else {
             return ResponseEntity.notFound().build();
         }
-    }
-
-    public UserDTO toDto(User user) {
-
-        Set<String> roleNames = user.getRoles().stream()
-                .map(Role::getName)
-                .collect(Collectors.toSet());
-
-        return new UserDTO(user.getId(), user.getEmail(), user.getUsername(), roleNames);
     }
 }

@@ -16,10 +16,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -37,7 +34,7 @@ public class UserService {
         this.roleRepository = roleRepository;
     }
 
-    public User registerUser(UserRegistrationDTO userRegistrationDTO, String performedBy) {
+    public UserDTO registerUser(UserRegistrationDTO userRegistrationDTO, String performedBy) {
         User user = new User();
         Set<Role> roles = new HashSet<>();
         Set<String> roleNames = userRegistrationDTO.getRoles();
@@ -59,7 +56,7 @@ public class UserService {
 
         User registerdUser = userRepository.save(user);
         audit("CREATE", "User", performedBy, "User ID: " + registerdUser.getId());
-        return  registerdUser;
+        return toDto(registerdUser);
     }
 
     public User validateUser(String username, String password) {
@@ -73,16 +70,25 @@ public class UserService {
         }
     }
 
-    public List<User> getAllUsers() {
-        return userRepository.findAll();
+    public List<UserDTO> getAllUsers() {
+        List<User> users =  userRepository.findAll();
+        List<UserDTO> dtos = new ArrayList<>();
+
+        for (User user : users) {
+            UserDTO dto = toDto(user);
+            dtos.add(dto);
+        }
+
+        return dtos;
     }
 
-    public User findById(Long id) {
-        return userRepository.findById(id)
+    public UserDTO findById(Long id) {
+        User user = userRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("User not found with id: " + id));
+        return toDto(user);
     }
 
-    public User updateUser(Long id, UserRegistrationDTO updatedUser, String performedBy) {
+    public UserDTO updateUser(Long id, UserRegistrationDTO updatedUser, String performedBy) {
         return userRepository.findById(id).map(user -> {
             Set<Role> roles = new HashSet<>();
             Set<String> roleNames = updatedUser.getRoles();
@@ -102,7 +108,7 @@ public class UserService {
             user.setRoles(roles);
             User saved = userRepository.save(user);
             audit("UPDATE", "User", performedBy, "User ID: " + saved.getId());
-            return saved;
+            return toDto(saved);
         }).orElseThrow(() -> new EntityNotFoundException("User not found with id: " + id));
     }
 
@@ -124,5 +130,14 @@ public class UserService {
         log.setPerformedAt(LocalDateTime.now());
         log.setDetails(details);
         auditLogRepository.save(log);
+    }
+
+    public UserDTO toDto(User user) {
+
+        Set<String> roleNames = user.getRoles().stream()
+                .map(Role::getName)
+                .collect(Collectors.toSet());
+
+        return new UserDTO(user.getId(), user.getEmail(), user.getUsername(), roleNames);
     }
 }
